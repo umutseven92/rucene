@@ -1,21 +1,22 @@
-use crate::rucene::token::Token;
 use regex::Regex;
+use rucene::rucene_internal::token::Token;
 
 /// The next step is tokenization. As the name indicates, during this step raw text is converted into a stream of tokens.
 /// There can be only one tokenizer in any given analysis chain.
-pub(crate) trait Tokenizer {
-    fn tokenize(input: String) -> Vec<Token>
-    where
-        Self: Sized;
+pub(crate) trait Tokenizer
+where
+    Self: Send + Sync,
+{
+    fn tokenize(&self, input: &String) -> Vec<Token>;
 }
 
 /// Splits on whitespace and punctuation.
 pub(crate) struct StandardTokenizer {}
 
 impl Tokenizer for StandardTokenizer {
-    fn tokenize(input: String) -> Vec<Token> {
+    fn tokenize(&self, input: &String) -> Vec<Token> {
         let re = Regex::new(r"\s|\.|,|-").unwrap();
-        let mut result = re.split(input.as_str());
+        let result = re.split(input.as_str());
 
         result
             .filter(|word| !word.is_empty())
@@ -27,7 +28,7 @@ impl Tokenizer for StandardTokenizer {
 #[cfg(test)]
 mod tests {
     use crate::api::tokenizers::{StandardTokenizer, Tokenizer};
-    use crate::rucene::token::Token;
+    use rucene::rucene_internal::token::Token;
 
     #[test]
     fn standard_tokenizer() {
@@ -44,7 +45,7 @@ mod tests {
             Token::new("Ole".to_string()),
         ];
 
-        let result = StandardTokenizer::tokenize(source.to_string());
+        let result = StandardTokenizer {}.tokenize(&source.to_string());
 
         assert_eq!(result, expected);
     }

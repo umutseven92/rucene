@@ -1,7 +1,6 @@
-use crate::rucene::document::{Document, DocumentResult};
-use crate::rucene::query::Query;
-use crate::rucene::token::Tokens;
-use crate::rucene::utils::filter_vector;
+use crate::rucene_internal::token::Tokens;
+use crate::rucene_internal::utils::filter_vector;
+use crate::{DocumentResult, Query};
 use std::collections::BTreeMap;
 use std::error::Error;
 
@@ -30,7 +29,10 @@ impl InvertedIndex {
     }
 
     /// Index the document in the `InvertedIndex`.
-    pub(crate) fn index(&mut self, document: Document) -> Result<(), Box<dyn Error>> {
+    pub(crate) fn index(
+        &mut self,
+        document: super::document::AnalysedDocument,
+    ) -> Result<(), Box<dyn Error>> {
         for token in document.tokens {
             match self.term_dictionary.get(&token.value) {
                 Some(val) => {
@@ -63,7 +65,7 @@ impl InvertedIndex {
     }
 
     /// Retrieve the list of document in the `InvertedIndex`, based on a `Query`.
-    pub(crate) fn retrieve(self, query: Query) -> Result<Vec<DocumentResult>, Box<dyn Error>> {
+    pub(crate) fn retrieve(&self, query: Query) -> Result<Vec<DocumentResult>, Box<dyn Error>> {
         let must_results = self.get_ids_from_tokens(query.must)?;
         let must_not_results = self.get_ids_from_tokens(query.must_not)?;
 
@@ -115,13 +117,14 @@ impl InvertedIndex {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rucene::token::Token;
+    use crate::rucene_internal::token::Token;
+    use crate::AnalysedDocument;
 
     fn init_test_inv_index() -> InvertedIndex {
         let mut inv_index = InvertedIndex::new();
 
         let documents = vec![
-            Document::new(
+            AnalysedDocument::new(
                 0,
                 vec![
                     Token::new(String::from("back")),
@@ -130,14 +133,14 @@ mod tests {
                     Token::new(String::from("future")),
                 ],
             ),
-            Document::new(
+            AnalysedDocument::new(
                 1,
                 vec![
                     Token::new(String::from("future")),
                     Token::new(String::from("cop")),
                 ],
             ),
-            Document::new(
+            AnalysedDocument::new(
                 2,
                 vec![
                     Token::new(String::from("back")),

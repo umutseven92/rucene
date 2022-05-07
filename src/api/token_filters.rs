@@ -1,18 +1,20 @@
-use crate::rucene::token::Token;
+use rucene::rucene_internal::token::Token;
 
 /// The final step is token filtering. Here the stream of tokens can be adjusted, either by adding or removing the tokens or by changing them.
-pub(crate) trait TokenFilter {
-    fn filter(tokens: &Vec<Token>) -> Vec<Token>
-    where
-        Self: Sized;
+pub(crate) trait TokenFilter
+where
+    Self: Send + Sync,
+{
+    /// The filtering is done in-place.
+    fn filter(&self, tokens: &mut Vec<Token>);
 }
 
 pub(crate) struct LowerCaseTokenFilter {}
 
 /// Lowercases each token.
 impl TokenFilter for LowerCaseTokenFilter {
-    fn filter(tokens: &Vec<Token>) -> Vec<Token> {
-        tokens
+    fn filter(&self, tokens: &mut Vec<Token>) {
+        *tokens = tokens
             .iter()
             .map(|token| Token::new(token.value.to_lowercase()))
             .collect()
@@ -22,11 +24,11 @@ impl TokenFilter for LowerCaseTokenFilter {
 #[cfg(test)]
 mod tests {
     use crate::api::token_filters::{LowerCaseTokenFilter, TokenFilter};
-    use crate::rucene::token::Token;
+    use rucene::rucene_internal::token::Token;
 
     #[test]
     fn lowercase_token_filter() {
-        let source = vec![
+        let mut source = vec![
             Token::new("The".to_string()),
             Token::new("Brown’s".to_string()),
             Token::new("fiftieth".to_string()),
@@ -48,8 +50,8 @@ mod tests {
             Token::new("ole".to_string()),
         ];
 
-        let result = LowerCaseTokenFilter::filter(&source);
+        LowerCaseTokenFilter {}.filter(&mut source);
 
-        assert_eq!(result, expected);
+        assert_eq!(source, expected);
     }
 }

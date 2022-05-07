@@ -1,9 +1,12 @@
-use crate::rucene::token::{Token, Tokens};
+use crate::rucene_internal::token::{Token, Tokens};
 
 /// Basically a copy of Lucene's `BooleanQuery`, with `must`, `must_not` and `should` clauses.
 /// # Example
 /// (taken from Relevant Search by Doug Turnbull and Jerry Berryman)
 /// ```
+///
+/// use rucene::rucene_internal::token::{Token};
+/// use rucene::rucene_internal::query::Query;
 ///
 /// let query = Query::new(
 /// vec![

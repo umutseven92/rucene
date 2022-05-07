@@ -1,15 +1,24 @@
-use crate::rucene::token::Token;
+use crate::rucene_internal::token::Token;
 
-pub struct Document {
+#[derive(Debug)]
+pub struct AnalysedDocument {
     pub id: u32,
     pub tokens: Vec<Token>,
 }
 
-impl Document {
+impl AnalysedDocument {
     pub fn new(id: u32, tokens: Vec<Token>) -> Self {
-        Document { id, tokens }
+        AnalysedDocument { id, tokens }
     }
 }
+
+impl PartialEq for AnalysedDocument {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id && self.tokens == other.tokens
+    }
+}
+
+impl Eq for AnalysedDocument {}
 
 #[derive(Debug)]
 pub struct DocumentResult {

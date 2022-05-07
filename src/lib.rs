@@ -2,12 +2,12 @@
 //!
 //! A very simple, Lucene-like library for full-text search, for educational purposes.
 
-use crate::rucene::document::{Document, DocumentResult};
-use crate::rucene::inverted_index::InvertedIndex;
-use crate::rucene::query::Query;
+use crate::rucene_internal::document::{AnalysedDocument, DocumentResult};
+use crate::rucene_internal::inverted_index::InvertedIndex;
+use crate::rucene_internal::query::Query;
 use std::error::Error;
 
-mod rucene;
+pub mod rucene_internal;
 
 pub struct Rucene {
     inverted_index: InvertedIndex,
@@ -20,7 +20,7 @@ impl Rucene {
         }
     }
 
-    pub fn index(mut self, document: Document) -> Result<(), Box<dyn Error>> {
+    pub fn index(&mut self, document: AnalysedDocument) -> Result<(), Box<dyn Error>> {
         self.inverted_index.index(document)
     }
 
